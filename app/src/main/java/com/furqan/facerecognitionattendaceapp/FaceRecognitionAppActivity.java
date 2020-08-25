@@ -86,7 +86,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
     private ArrayList<String> imagesLabels;
     private String[] uniqueLabels;
     private CameraBridgeViewBase mOpenCvCameraView;
-    private Mat mRgba, mGray;
+    public Mat mRgba, mGray;
     private Toast mToast;
     private boolean useEigenfaces;
     private SeekBarArrows mThresholdFace, mThresholdDistance, mMaximumImages;

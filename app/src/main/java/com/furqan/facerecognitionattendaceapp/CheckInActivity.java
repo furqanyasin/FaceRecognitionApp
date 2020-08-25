@@ -60,13 +60,13 @@ import java.util.Locale;
 import java.util.Set;
 
 public class CheckInActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
-    private static final String TAG = CheckInActivity.class.getSimpleName();
+    private static final String TAG = FaceRecognitionAppActivity.class.getSimpleName();
     private static final int PERMISSIONS_REQUEST_CODE = 0;
     private ArrayList<Mat> images;
     private ArrayList<String> imagesLabels;
     private String[] uniqueLabels;
     private CameraBridgeViewBase mOpenCvCameraView;
-    private Mat mRgba, mGray;
+    public Mat mRgba, mGray;
     private Toast mToast;
     private boolean useEigenfaces;
     private SeekBarArrows mThresholdFace, mThresholdDistance, mMaximumImages;
@@ -76,7 +76,6 @@ public class CheckInActivity extends AppCompatActivity implements CameraBridgeVi
     private TinyDB tinydb;
     private Toolbar mToolbar;
     private NativeMethods.TrainFacesTask mTrainFacesTask;
-    NativeMethods.MeasureDistTask mMeasureDistTask;
 
 
     private void showToast(String message, int duration) {
@@ -264,20 +263,20 @@ public class CheckInActivity extends AppCompatActivity implements CameraBridgeVi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_face_recognition_app);
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        setContentView(R.layout.activity_check_in);
+
+        mToolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar); // Sets the Toolbar to act as the ActionBar for this Activity window
 
 
-        tinydb = new TinyDB(this); // Used to store ArrayLists in the shared preferences
+        tinydb = new TinyDB(this);
+        // Set radio button based on value stored in shared preferences
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        useEigenfaces = prefs.getBoolean("useEigenfaces", true);
 
-        mThresholdFace = findViewById(R.id.threshold_face);
-        faceThreshold = mThresholdFace.getProgress();// Get initial value
-
-
-        mThresholdDistance = findViewById(R.id.threshold_distance);
-        distanceThreshold = mThresholdDistance.getProgress(); // Get initial value
-
-        mMaximumImages = findViewById(R.id.maximum_images);
-        maximumImages = (int) mMaximumImages.getProgress(); // Get initial value
 
         final GestureDetector mGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
@@ -291,9 +290,10 @@ public class CheckInActivity extends AppCompatActivity implements CameraBridgeVi
                 flipCameraAnimation();
                 return true;
             }
+
         });
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        mOpenCvCameraView = findViewById(R.id.camera_java_surface_view);
+
+        mOpenCvCameraView = findViewById(R.id.camera_java_surface_view_detector);
         mOpenCvCameraView.setCameraIndex(prefs.getInt("mCameraIndex", CameraBridgeViewBase.CAMERA_ID_FRONT));
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
@@ -303,7 +303,17 @@ public class CheckInActivity extends AppCompatActivity implements CameraBridgeVi
                 return mGestureDetector.onTouchEvent(event);
             }
         });
+
     }
+   /* @Override
+    public boolean dispatchTouchEvent(MotionEvent e) {
+        boolean dispatched;
+        Log.d(TAG, "dispatchTouchEvent");
+        dispatched = super.dispatchTouchEvent(e);
+        if (!dispatched && mOpenCvCameraView != null) dispatched = mOpenCvCameraView.onTouchEvent(e);
+        return dispatched;
+    }*/
+
 
     private NativeMethods.MeasureDistTask.Callback measureDistTaskCallback = new NativeMethods.MeasureDistTask.Callback() {
         @Override
@@ -366,33 +376,15 @@ public class CheckInActivity extends AppCompatActivity implements CameraBridgeVi
     @Override
     public void onStart() {
         super.onStart();
-        // Read threshold values
-        float progress = prefs.getFloat("faceThreshold", -1);
-        if (progress != -1)
-            mThresholdFace.setProgress(progress);
-        progress = prefs.getFloat("distanceThreshold", -1);
-        if (progress != -1)
-            mThresholdDistance.setProgress(progress);
-        mMaximumImages.setProgress(prefs.getInt("maximumImages", 25)); // Use 25 images by default
+
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        // Store threshold values
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putFloat("faceThreshold", faceThreshold);
-        editor.putFloat("distanceThreshold", distanceThreshold);
-        editor.putInt("maximumImages", maximumImages);
-        editor.putBoolean("useEigenfaces", useEigenfaces);
-        editor.putInt("mCameraIndex", mOpenCvCameraView.mCameraIndex);
-        editor.apply();
+
 
         // Store ArrayLists containing the images and labels
-        if (images != null && imagesLabels != null) {
-            tinydb.putListMat("images", images);
-            tinydb.putListString("imagesLabels", imagesLabels);
-        }
 
 
     }
@@ -421,7 +413,7 @@ public class CheckInActivity extends AppCompatActivity implements CameraBridgeVi
                     images = tinydb.getListMat("images");
                     imagesLabels = tinydb.getListString("imagesLabels");
 
-                    Log.i(TAG, "Number of images: " + images.size() + ". Number of labels: " + imagesLabels.size());
+                    //Log.i(TAG, "Number of images: " + images.size() + ". Number of labels: " + imagesLabels.size());
                     if (!images.isEmpty()) {
                         trainFaces(); // Train images after they are loaded
                         Log.i(TAG, "Images height: " + images.get(0).height() + " Width: " + images.get(0).width() + " total: " + images.get(0).total());
@@ -516,6 +508,28 @@ public class CheckInActivity extends AppCompatActivity implements CameraBridgeVi
         mRgba = mRgbaTmp;
 
         return mRgba;
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public void SaveImage(Mat mat) {
+        Mat mIntermediateMat = new Mat();
+
+        if (mat.channels() == 1) // Grayscale image
+            Imgproc.cvtColor(mat, mIntermediateMat, Imgproc.COLOR_GRAY2BGR);
+        else
+            Imgproc.cvtColor(mat, mIntermediateMat, Imgproc.COLOR_RGBA2BGR);
+
+        File path = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), TAG); // Save pictures in Pictures directory
+        path.mkdir(); // Create directory if needed
+        String fileName = "IMG_" + new SimpleDateFormat("yyyyMMdd_HHmmss_SSS", Locale.US).format(new Date()) + ".png";
+        File file = new File(path, fileName);
+
+        boolean bool = Imgcodecs.imwrite(file.toString(), mIntermediateMat);
+
+        if (bool)
+            Log.i(TAG, "SUCCESS writing image to external storage");
+        else
+            Log.e(TAG, "Failed writing image to external storage");
     }
 
     @Override
