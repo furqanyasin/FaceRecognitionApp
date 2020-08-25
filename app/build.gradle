@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId 'com.lauszus.facerecognitionapp'
+        applicationId 'com.furqan.facerecognitionattendaceapp'
         minSdkVersion 16
         targetSdkVersion 28
         versionCode 6
@@ -72,7 +72,8 @@ android {
 dependencies {
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support:design:28.0.0'
-    implementation project(':opencv')
+    implementation project(':openCVLibrary341')
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
 }
 
 // These values are all set in my global gradle.properties file

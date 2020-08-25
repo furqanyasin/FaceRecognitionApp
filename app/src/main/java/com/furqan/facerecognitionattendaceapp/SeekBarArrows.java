@@ -16,7 +16,7 @@
  * e-mail   :  lauszus@gmail.com
  ******************************************************************************/
 
-package com.lauszus.facerecognitionapp;
+package com.furqan.facerecognitionattendaceapp;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -33,7 +33,7 @@ import android.widget.TextView;
 import java.util.Locale;
 
 public class SeekBarArrows extends LinearLayout implements SeekBar.OnSeekBarChangeListener {
-    private static final String TAG = FaceRecognitionAppActivity.class.getSimpleName() + "/" + SeekBarArrows.class.getSimpleName();
+    private static final String TAG = MainActivity.class.getSimpleName() + "/" + SeekBarArrows.class.getSimpleName();
     private SeekBar mSeekBar;
     private TextView mSeekBarValue;
     private float multiplier;

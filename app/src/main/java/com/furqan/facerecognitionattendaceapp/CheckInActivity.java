@@ -1,33 +1,13 @@
-/*******************************************************************************
- * Copyright (C) 2016 Kristian Sloth Lauszus. All rights reserved.
- *
- * This software may be distributed and modified under the terms of the GNU
- * General Public License version 2 (GPL2) as published by the Free Software
- * Foundation and appearing in the file GPL2.TXT included in the packaging of
- * this file. Please note that GPL2 Section 2[b] requires that all works based
- * on this software must also be made publicly available under the terms of
- * the GPL2 ("Copyleft").
- *
- * Contact information
- * -------------------
- *
- * Kristian Sloth Lauszus
- * Web      :  http://www.lauszus.com
- * e-mail   :  lauszus@gmail.com
- ******************************************************************************/
-
-package com.lauszus.facerecognitionapp;
+package com.furqan.facerecognitionattendaceapp;
 
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -39,6 +19,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Log;
@@ -78,8 +59,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-public class FaceRecognitionAppActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
-    private static final String TAG = FaceRecognitionAppActivity.class.getSimpleName();
+public class CheckInActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
+    private static final String TAG = CheckInActivity.class.getSimpleName();
     private static final int PERMISSIONS_REQUEST_CODE = 0;
     private ArrayList<Mat> images;
     private ArrayList<String> imagesLabels;
@@ -95,6 +76,8 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
     private TinyDB tinydb;
     private Toolbar mToolbar;
     private NativeMethods.TrainFacesTask mTrainFacesTask;
+    NativeMethods.MeasureDistTask mMeasureDistTask;
+
 
     private void showToast(String message, int duration) {
         if (duration != Toast.LENGTH_SHORT && duration != Toast.LENGTH_LONG)
@@ -115,7 +98,8 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
 
     /**
      * Train faces using stored images.
-     * @return  Returns false if the task is already running.
+     *
+     * @return Returns false if the task is already running.
      */
     private boolean trainFaces() {
         if (images.isEmpty())
@@ -160,8 +144,8 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
                 }
             }
 
-            /*for (int i = 0; i < imagesLabels.size(); i++)
-                Log.i(TAG, "Classes: " + imagesLabels.get(i) + " = " + classes[i]);*/
+            for (int i = 0; i < imagesLabels.size(); i++)
+                Log.i(TAG, "Classes: " + imagesLabels.get(i) + " = " + classes[i]);
 
             Mat vectorClasses = new Mat(classes.length, 1, CvType.CV_32S); // CV_32S == int
             vectorClasses.put(0, 0, classes); // Copy int array into a vector
@@ -186,8 +170,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
     private void showLabelsDialog() {
         Set<String> uniqueLabelsSet = new HashSet<>(imagesLabels); // Get all unique labels
         if (!uniqueLabelsSet.isEmpty()) { // Make sure that there are any labels
-            // Inspired by: http://stackoverflow.com/questions/15762905/how-can-i-display-a-list-view-in-an-android-alert-dialog
-            AlertDialog.Builder builder = new AlertDialog.Builder(FaceRecognitionAppActivity.this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(CheckInActivity.this);
             builder.setTitle("Select label:");
             builder.setPositiveButton("New face", new DialogInterface.OnClickListener() {
                 @Override
@@ -207,9 +190,10 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
 
             String[] uniqueLabels = uniqueLabelsSet.toArray(new String[uniqueLabelsSet.size()]); // Convert to String array for ArrayAdapter
             Arrays.sort(uniqueLabels); // Sort labels alphabetically
-            final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(FaceRecognitionAppActivity.this, android.R.layout.simple_list_item_1, uniqueLabels) {
+            final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(CheckInActivity.this, android.R.layout.simple_list_item_1, uniqueLabels) {
                 @Override
-                public @NonNull View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                public @NonNull
+                View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
                     TextView textView = (TextView) super.getView(position, convertView, parent);
                     if (getResources().getBoolean(R.bool.isTablet))
                         textView.setTextSize(20); // Make text slightly bigger on tablets compared to phones
@@ -218,7 +202,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
                     return textView;
                 }
             };
-            ListView mListView = new ListView(FaceRecognitionAppActivity.this);
+            ListView mListView = new ListView(CheckInActivity.this);
             mListView.setAdapter(arrayAdapter); // Set adapter, so the items actually show up
             builder.setView(mListView); // Set the ListView
 
@@ -236,10 +220,10 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
     }
 
     private void showEnterLabelDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(FaceRecognitionAppActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(CheckInActivity.this);
         builder.setTitle("Please enter your name:");
 
-        final EditText input = new EditText(FaceRecognitionAppActivity.this);
+        final EditText input = new EditText(CheckInActivity.this);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);
 
@@ -253,8 +237,6 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
         });
         builder.setCancelable(false); // User has to input a name
         AlertDialog dialog = builder.create();
-
-        // Source: http://stackoverflow.com/a/7636468/2175837
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(final DialogInterface dialog) {
@@ -282,152 +264,27 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
         setContentView(R.layout.activity_face_recognition_app);
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(mToolbar); // Sets the Toolbar to act as the ActionBar for this Activity window
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-
-        final RadioButton mRadioButtonEigenfaces = (RadioButton) findViewById(R.id.eigenfaces);
-        final RadioButton mRadioButtonFisherfaces = (RadioButton) findViewById(R.id.fisherfaces);
-
-        mRadioButtonEigenfaces.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                useEigenfaces = true;
-                if (!trainFaces()) {
-                    useEigenfaces = false; // Set variable back
-                    showToast("Still training...", Toast.LENGTH_SHORT);
-                    mRadioButtonEigenfaces.setChecked(useEigenfaces);
-                    mRadioButtonFisherfaces.setChecked(!useEigenfaces);
-                }
-            }
-        });
-        mRadioButtonFisherfaces.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                useEigenfaces = false;
-                if (!trainFaces()) {
-                    useEigenfaces = true; // Set variable back
-                    showToast("Still training...", Toast.LENGTH_SHORT);
-                    mRadioButtonEigenfaces.setChecked(useEigenfaces);
-                    mRadioButtonFisherfaces.setChecked(!useEigenfaces);
-                }
-            }
-        });
-
-        // Set radio button based on value stored in shared preferences
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        useEigenfaces = prefs.getBoolean("useEigenfaces", false);
-        mRadioButtonEigenfaces.setChecked(useEigenfaces);
-        mRadioButtonFisherfaces.setChecked(!useEigenfaces);
 
         tinydb = new TinyDB(this); // Used to store ArrayLists in the shared preferences
 
-        mThresholdFace = (SeekBarArrows) findViewById(R.id.threshold_face);
-        mThresholdFace.setOnSeekBarArrowsChangeListener(new SeekBarArrows.OnSeekBarArrowsChangeListener() {
-            @Override
-            public void onProgressChanged(float progress) {
-                Log.i(TAG, "Face threshold: " + mThresholdFace.progressToString(progress));
-                faceThreshold = progress;
-            }
-        });
-        faceThreshold = mThresholdFace.getProgress(); // Get initial value
+        mThresholdFace = findViewById(R.id.threshold_face);
+        faceThreshold = mThresholdFace.getProgress();// Get initial value
 
-        mThresholdDistance = (SeekBarArrows) findViewById(R.id.threshold_distance);
-        mThresholdDistance.setOnSeekBarArrowsChangeListener(new SeekBarArrows.OnSeekBarArrowsChangeListener() {
-            @Override
-            public void onProgressChanged(float progress) {
-                Log.i(TAG, "Distance threshold: " + mThresholdDistance.progressToString(progress));
-                distanceThreshold = progress;
-            }
-        });
+
+        mThresholdDistance = findViewById(R.id.threshold_distance);
         distanceThreshold = mThresholdDistance.getProgress(); // Get initial value
 
-        mMaximumImages = (SeekBarArrows) findViewById(R.id.maximum_images);
-        mMaximumImages.setOnSeekBarArrowsChangeListener(new SeekBarArrows.OnSeekBarArrowsChangeListener() {
-            @Override
-            public void onProgressChanged(float progress) {
-                Log.i(TAG, "Maximum number of images: " + mMaximumImages.progressToString(progress));
-                maximumImages = (int)progress;
-                if (images != null && images.size() > maximumImages) {
-                    int nrRemoveImages = images.size() - maximumImages;
-                    Log.i(TAG, "Removed " + nrRemoveImages + " images from the list");
-                    images.subList(0, nrRemoveImages).clear(); // Remove oldest images
-                    imagesLabels.subList(0, nrRemoveImages).clear(); // Remove oldest labels
-                    trainFaces(); // Retrain faces
-                }
-            }
-        });
-        maximumImages = (int)mMaximumImages.getProgress(); // Get initial value
-
-        findViewById(R.id.clear_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.i(TAG, "Cleared training set");
-                images.clear(); // Clear both arrays, when new instance is created
-                imagesLabels.clear();
-                showToast("Training set cleared", Toast.LENGTH_SHORT);
-            }
-        });
-
-        findViewById(R.id.take_picture_button).setOnClickListener(new View.OnClickListener() {
-            NativeMethods.MeasureDistTask mMeasureDistTask;
-
-            @Override
-            public void onClick(View v) {
-                if (mMeasureDistTask != null && mMeasureDistTask.getStatus() != AsyncTask.Status.FINISHED) {
-                    Log.i(TAG, "mMeasureDistTask is still running");
-                    showToast("Still processing old image...", Toast.LENGTH_SHORT);
-                    return;
-                }
-                if (mTrainFacesTask != null && mTrainFacesTask.getStatus() != AsyncTask.Status.FINISHED) {
-                    Log.i(TAG, "mTrainFacesTask is still running");
-                    showToast("Still training...", Toast.LENGTH_SHORT);
-                    return;
-                }
-
-                Log.i(TAG, "Gray height: " + mGray.height() + " Width: " + mGray.width() + " total: " + mGray.total());
-                if (mGray.total() == 0)
-                    return;
-
-                // Scale image in order to decrease computation time and make the image square,
-                // so it does not crash on phones with different aspect ratios for the front
-                // and back camera
-                Size imageSize = new Size(200, 200);
-                Imgproc.resize(mGray, mGray, imageSize);
-                Log.i(TAG, "Small gray height: " + mGray.height() + " Width: " + mGray.width() + " total: " + mGray.total());
-                //SaveImage(mGray);
-
-                Mat image = mGray.reshape(0, (int) mGray.total()); // Create column vector
-                Log.i(TAG, "Vector height: " + image.height() + " Width: " + image.width() + " total: " + image.total());
-                images.add(image); // Add current image to the array
-
-                if (images.size() > maximumImages) {
-                    images.remove(0); // Remove first image
-                    imagesLabels.remove(0); // Remove first label
-                    Log.i(TAG, "The number of images is limited to: " + images.size());
-                }
-
-                // Calculate normalized Euclidean distance
-                mMeasureDistTask = new NativeMethods.MeasureDistTask(useEigenfaces, measureDistTaskCallback);
-                mMeasureDistTask.execute(image);
-
-                showLabelsDialog();
-            }
-        });
+        mMaximumImages = findViewById(R.id.maximum_images);
+        maximumImages = (int) mMaximumImages.getProgress(); // Get initial value
 
         final GestureDetector mGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDown(MotionEvent e) {
                 return true;
             }
+
             @Override
             public boolean onDoubleTap(MotionEvent e) {
                 // Show flip animation when the camera is flipped due to a double tap
@@ -435,8 +292,8 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
                 return true;
             }
         });
-
-        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.camera_java_surface_view);
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mOpenCvCameraView = findViewById(R.id.camera_java_surface_view);
         mOpenCvCameraView.setCameraIndex(prefs.getInt("mCameraIndex", CameraBridgeViewBase.CAMERA_ID_FRONT));
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
@@ -523,7 +380,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
     public void onStop() {
         super.onStop();
         // Store threshold values
-        Editor editor = prefs.edit();
+        SharedPreferences.Editor editor = prefs.edit();
         editor.putFloat("faceThreshold", faceThreshold);
         editor.putFloat("distanceThreshold", distanceThreshold);
         editor.putInt("maximumImages", maximumImages);
@@ -536,6 +393,8 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
             tinydb.putListMat("images", images);
             tinydb.putListString("imagesLabels", imagesLabels);
         }
+
+
     }
 
     @Override
@@ -562,7 +421,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
                     images = tinydb.getListMat("images");
                     imagesLabels = tinydb.getListString("imagesLabels");
 
-                    Log.i(TAG, "Number of images: " + images.size()  + ". Number of labels: " + imagesLabels.size());
+                    Log.i(TAG, "Number of images: " + images.size() + ". Number of labels: " + imagesLabels.size());
                     if (!images.isEmpty()) {
                         trainFaces(); // Train images after they are loaded
                         Log.i(TAG, "Images height: " + images.get(0).height() + " Width: " + images.get(0).width() + " total: " + images.get(0).total());
@@ -597,6 +456,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
     public void onCameraViewStarted(int width, int height) {
         mGray = new Mat();
         mRgba = new Mat();
+
     }
 
     public void onCameraViewStopped() {
@@ -656,28 +516,6 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
         mRgba = mRgbaTmp;
 
         return mRgba;
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    public void SaveImage(Mat mat) {
-        Mat mIntermediateMat = new Mat();
-
-        if (mat.channels() == 1) // Grayscale image
-            Imgproc.cvtColor(mat, mIntermediateMat, Imgproc.COLOR_GRAY2BGR);
-        else
-            Imgproc.cvtColor(mat, mIntermediateMat, Imgproc.COLOR_RGBA2BGR);
-
-        File path = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), TAG); // Save pictures in Pictures directory
-        path.mkdir(); // Create directory if needed
-        String fileName = "IMG_" + new SimpleDateFormat("yyyyMMdd_HHmmss_SSS", Locale.US).format(new Date()) + ".png";
-        File file = new File(path, fileName);
-
-        boolean bool = Imgcodecs.imwrite(file.toString(), mIntermediateMat);
-
-        if (bool)
-            Log.i(TAG, "SUCCESS writing image to external storage");
-        else
-            Log.e(TAG, "Failed writing image to external storage");
     }
 
     @Override

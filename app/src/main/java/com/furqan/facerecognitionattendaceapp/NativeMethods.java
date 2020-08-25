@@ -16,7 +16,7 @@
  * e-mail   :  lauszus@gmail.com
  ******************************************************************************/
 
-package com.lauszus.facerecognitionapp;
+package com.furqan.facerecognitionattendaceapp;
 
 import android.os.AsyncTask;
 import android.os.Bundle;

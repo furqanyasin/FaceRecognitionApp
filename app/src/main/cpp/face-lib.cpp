@@ -49,7 +49,7 @@ using namespace Eigen;
 extern "C" {
 #endif
 
-JNIEXPORT void JNICALL Java_com_lauszus_facerecognitionapp_NativeMethods_TrainFaces(JNIEnv, jobject, jlong addrImages, jlong addrClasses) {
+JNIEXPORT void JNICALL Java_com_furqan_facerecognitionattendaceapp_NativeMethods_TrainFaces(JNIEnv, jobject, jlong addrImages, jlong addrClasses) {
     Mat *pImages = (Mat *) addrImages; // Each images is represented as a column vector
     Mat *pClasses = (Mat *) addrClasses; // Classes are represented as a vector
 
@@ -83,7 +83,7 @@ JNIEXPORT void JNICALL Java_com_lauszus_facerecognitionapp_NativeMethods_TrainFa
     */
 }
 
-JNIEXPORT void JNICALL Java_com_lauszus_facerecognitionapp_NativeMethods_MeasureDist(JNIEnv *env, jobject, jlong addrImage, jfloatArray minDist, jintArray minDistIndex, jfloatArray faceDist, jboolean useEigenfaces) {
+JNIEXPORT void JNICALL Java_com_furqan_facerecognitionattendaceapp_NativeMethods_MeasureDist(JNIEnv *env, jobject, jlong addrImage, jfloatArray minDist, jintArray minDistIndex, jfloatArray faceDist, jboolean useEigenfaces) {
     Facebase *pFacebase;
     if (useEigenfaces) {
         LOGI("Using Eigenfaces");

@@ -1,6 +1,6 @@
 // Based on: https://github.com/opencv/opencv/blob/master/modules/java/generator/android/java/org/opencv/android/JavaCameraView.java
 
-package com.lauszus.facerecognitionapp;
+package com.furqan.facerecognitionattendaceapp;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

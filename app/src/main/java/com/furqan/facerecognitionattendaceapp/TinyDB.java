@@ -22,7 +22,7 @@
 // Modified version of: https://github.com/kcochibili/TinyDB--Android-Shared-Preferences-Turbo
 // Added getListMat and putListMat methods
 
-package com.lauszus.facerecognitionapp;
+package com.furqan.facerecognitionattendaceapp;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -58,7 +58,6 @@ public class TinyDB {
         preferences = PreferenceManager.getDefaultSharedPreferences(appContext);
     }
 
-
     /**
      * Decodes the Bitmap from 'path' and returns it
      * @param path image path
@@ -77,7 +76,6 @@ public class TinyDB {
         return bitmapFromPath;
     }
 
-
     /**
      * Returns the String path of the last saved image
      * @return string path of the last saved image
@@ -85,7 +83,6 @@ public class TinyDB {
     public String getSavedImagePath() {
         return lastImagePath;
     }
-
 
     /**
      * Saves 'theBitmap' into folder 'theFolder' with the name 'theImageName'
@@ -108,7 +105,6 @@ public class TinyDB {
 
         return mFullPath;
     }
-
 
     /**
      * Saves 'theBitmap' into 'fullPath'
@@ -525,7 +521,6 @@ public class TinyDB {
         return new File(path).delete();
     }
 
-
     /**
      * Clear SharedPreferences (remove everything)
      */
@@ -540,7 +535,6 @@ public class TinyDB {
     public Map<String, ?> getAll() {
         return preferences.getAll();
     }
-
 
     /**
      * Register SharedPreferences change listener
@@ -584,7 +578,7 @@ public class TinyDB {
     /**
      * null keys would corrupt the shared pref file and make them unreadable this is a preventive measure
      * @param the pref key
-     */
+     **/
     public void checkForNullKey(String key){
         if (key == null){
             throw new NullPointerException();
