@@ -26,16 +26,16 @@ import org.opencv.core.Mat;
 
 // All computations is done in an asynchronous task, so we do not skip any frames
 class NativeMethods {
-    private static final String TAG = FaceRecognitionAppActivity.class.getSimpleName() + "/" + NativeMethods.class.getSimpleName();
+    public static final String TAG = FaceRecognitionAppActivity.class.getSimpleName() + "/" + NativeMethods.class.getSimpleName();
 
     static void loadNativeLibraries() {
         System.loadLibrary("face-lib");
     }
 
     static class TrainFacesTask extends AsyncTask<Void, Void, Boolean> {
-        private final Mat images, classes;
-        private final Callback callback;
-        private Exception error;
+        public final Mat images, classes;
+        public final Callback callback;
+        public Exception error;
 
         interface Callback {
             void onTrainFacesComplete(boolean result);
@@ -85,13 +85,13 @@ class NativeMethods {
     }
 
     static class MeasureDistTask extends AsyncTask<Mat, Void, Bundle> {
-        static final String MIN_DIST_FLOAT = "minDist";
-        static final String MIN_DIST_INDEX_INT = "minDistIndex";
-        static final String DIST_FACE_FLOAT = "distFace";
+        public static final String MIN_DIST_FLOAT = "minDist";
+        public static final String MIN_DIST_INDEX_INT = "minDistIndex";
+        public static final String DIST_FACE_FLOAT = "distFace";
 
-        private final Callback callback;
-        private final boolean useEigenfaces;
-        private Exception error;
+        public final Callback callback;
+        public final boolean useEigenfaces;
+        public Exception error;
 
         interface Callback {
             void onMeasureDistComplete(Bundle bundle);
@@ -138,7 +138,7 @@ class NativeMethods {
      *                      If set to NULL, then Eigenfaces will be used.
      *                      If this is set, then Fisherfaces will be used.
      */
-    private static native void TrainFaces(long addrImages, long addrClasses);
+    public static native void TrainFaces(long addrImages, long addrClasses);
 
     /**
      * Measure euclidean distance between the weight of the image compared to all weights.
@@ -149,5 +149,5 @@ class NativeMethods {
      * @param useEigenfaces Set to true if Eigenfaces are used. If set to false,
      *                      then Fisherfaces will be used.
      */
-    private static native void MeasureDist(long addrImage, float[] minDist, int[] minDistIndex, float[] faceDist, boolean useEigenfaces);
+    public static native void MeasureDist(long addrImage, float[] minDist, int[] minDistIndex, float[] faceDist, boolean useEigenfaces);
 }

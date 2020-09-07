@@ -33,7 +33,7 @@ import android.widget.TextView;
 import java.util.Locale;
 
 public class SeekBarArrows extends LinearLayout implements SeekBar.OnSeekBarChangeListener {
-    private static final String TAG = MainActivity.class.getSimpleName() + "/" + SeekBarArrows.class.getSimpleName();
+    private static final String TAG = FaceRecognitionAppActivity.class.getSimpleName() + "/" + SeekBarArrows.class.getSimpleName();
     private SeekBar mSeekBar;
     private TextView mSeekBarValue;
     private float multiplier;
@@ -52,9 +52,9 @@ public class SeekBarArrows extends LinearLayout implements SeekBar.OnSeekBarChan
         float max = styledAttrs.getFloat(R.styleable.SeekBarArrows_max, 0);
         nValues = styledAttrs.getInt(R.styleable.SeekBarArrows_n_values, 0);
 
-        mSeekBar = (SeekBar) findViewById(R.id.seekBar);
+        mSeekBar = findViewById(R.id.seekBar);
         ((TextView) findViewById(R.id.text)).setText(mSeekBarText);
-        mSeekBarValue = (TextView) findViewById(R.id.value);
+        mSeekBarValue = findViewById(R.id.value);
 
         setMax(max); // Set maximum value
         mSeekBar.setOnSeekBarChangeListener(this); // Set listener
@@ -99,7 +99,7 @@ public class SeekBarArrows extends LinearLayout implements SeekBar.OnSeekBarChan
     }
 
     public void setMax(float max) {
-        multiplier = max / (float)nValues;
+        multiplier = max / (float) nValues;
         mSeekBar.setMax(nValues - min);
         Log.i(TAG, "Max: " + max + " Raw: " + mSeekBar.getMax() + " Multiplier: " + multiplier);
     }
@@ -115,14 +115,14 @@ public class SeekBarArrows extends LinearLayout implements SeekBar.OnSeekBarChan
 
     public String progressToString(int value) {
         String format = getFormat(); // Set decimal places according to multiplier
-        return String.format(Locale.US, format, (float)value * multiplier); // SeekBar can only handle integers, so format it to a float
+        return String.format(Locale.US, format, (float) value * multiplier); // SeekBar can only handle integers, so format it to a float
     }
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         mSeekBarValue.setText(progressToString(progress + min));
         if (mOnSeekBarArrowsChangeListener != null)
-            mOnSeekBarArrowsChangeListener.onProgressChanged((float)progress * multiplier + min);
+            mOnSeekBarArrowsChangeListener.onProgressChanged((float) progress * multiplier + min);
     }
 
     @Override
@@ -150,7 +150,7 @@ public class SeekBarArrows extends LinearLayout implements SeekBar.OnSeekBarChan
         }
 
         private int round10(int n) {
-            return Math.round((float)n / 10.0f) * 10;
+            return Math.round((float) n / 10.0f) * 10;
         }
 
         private void longClick() {

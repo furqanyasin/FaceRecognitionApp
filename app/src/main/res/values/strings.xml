@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Face Recognition</string>
+    <string name="app_name">FRAA</string>
     <string name="picture_button">Take picture</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -20,4 +20,6 @@
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
     <string name="add_employee">Add Employee</string>
+    <string name="checkin_attendance">CheckIn Attendance</string>
+    <string name="add_new_employee">Add New Employee</string>
 </resources>

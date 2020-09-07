@@ -101,6 +101,7 @@ public class TinyDB {
         if (!mFullPath.equals("")) {
             lastImagePath = mFullPath;
             saveBitmap(mFullPath, theBitmap);
+
         }
 
         return mFullPath;

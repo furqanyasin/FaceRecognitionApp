@@ -80,25 +80,25 @@ import java.util.Locale;
 import java.util.Set;
 
 public class FaceRecognitionAppActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
-    private static final String TAG = FaceRecognitionAppActivity.class.getSimpleName();
-    private static final int PERMISSIONS_REQUEST_CODE = 0;
-    private ArrayList<Mat> images;
-    private ArrayList<String> imagesLabels;
-    private String[] uniqueLabels;
-    private CameraBridgeViewBase mOpenCvCameraView;
+    public static final String TAG = FaceRecognitionAppActivity.class.getSimpleName();
+    public static final int PERMISSIONS_REQUEST_CODE = 0;
+    public ArrayList<Mat> images;
+    public ArrayList<String> imagesLabels;
+    public String[] uniqueLabels;
+    public CameraBridgeViewBase mOpenCvCameraView;
     public Mat mRgba, mGray;
-    private Toast mToast;
-    private boolean useEigenfaces;
-    private SeekBarArrows mThresholdFace, mThresholdDistance, mMaximumImages;
-    private float faceThreshold, distanceThreshold;
-    private int maximumImages;
-    private SharedPreferences prefs;
-    private TinyDB tinydb;
-    private Toolbar mToolbar;
-    private NativeMethods.TrainFacesTask mTrainFacesTask;
+    public Toast mToast;
+    public boolean useEigenfaces;
+    public SeekBarArrows mThresholdFace, mThresholdDistance, mMaximumImages;
+    public float faceThreshold, distanceThreshold;
+    public int maximumImages;
+    public SharedPreferences prefs;
+    public TinyDB tinydb;
+    public Toolbar mToolbar;
+    public NativeMethods.TrainFacesTask mTrainFacesTask;
 
 
-    private void showToast(String message, int duration) {
+    public void showToast(String message, int duration) {
         if (duration != Toast.LENGTH_SHORT && duration != Toast.LENGTH_LONG)
             throw new IllegalArgumentException();
         if (mToast != null && mToast.getView().isShown())
@@ -107,7 +107,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
         mToast.show();
     }
 
-    private void addLabel(String string) {
+    public void addLabel(String string) {
         String label = string.substring(0, 1).toUpperCase(Locale.US) + string.substring(1).trim().toLowerCase(Locale.US); // Make sure that the name is always uppercase and rest is lowercase
         imagesLabels.add(label); // Add label to list of labels
         Log.i(TAG, "Label: " + label);
@@ -120,7 +120,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
      *
      * @return Returns false if the task is already running.
      */
-    private boolean trainFaces() {
+    public boolean trainFaces() {
         if (images.isEmpty())
             return true; // The array might be empty if the method is changed in the OnClickListener
 
@@ -176,7 +176,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
         return true;
     }
 
-    private NativeMethods.TrainFacesTask.Callback trainFacesTaskCallback = new NativeMethods.TrainFacesTask.Callback() {
+    public NativeMethods.TrainFacesTask.Callback trainFacesTaskCallback = new NativeMethods.TrainFacesTask.Callback() {
         @Override
         public void onTrainFacesComplete(boolean result) {
             if (result)
@@ -186,7 +186,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
         }
     };
 
-    private void showLabelsDialog() {
+    public void showLabelsDialog() {
         Set<String> uniqueLabelsSet = new HashSet<>(imagesLabels); // Get all unique labels
         if (!uniqueLabelsSet.isEmpty()) { // Make sure that there are any labels
             AlertDialog.Builder builder = new AlertDialog.Builder(FaceRecognitionAppActivity.this);
@@ -238,9 +238,10 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
             showEnterLabelDialog(); // If there is no existing labels, then ask the user for a new label
     }
 
-    private void showEnterLabelDialog() {
+    public void showEnterLabelDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(FaceRecognitionAppActivity.this);
         builder.setTitle("Please enter your name:");
+
 
         final EditText input = new EditText(FaceRecognitionAppActivity.this);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
@@ -290,10 +291,10 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
         mToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar); // Sets the Toolbar to act as the ActionBar for this Activity window
 
-      /*  DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
-        toggle.syncState();*/
+        toggle.syncState();
 
         final RadioButton mRadioButtonEigenfaces = findViewById(R.id.eigenfaces);
         final RadioButton mRadioButtonFisherfaces = findViewById(R.id.fisherfaces);
@@ -351,7 +352,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
         });
         distanceThreshold = mThresholdDistance.getProgress(); // Get initial value
 
-        mMaximumImages =  findViewById(R.id.maximum_images);
+        mMaximumImages = findViewById(R.id.maximum_images);
         mMaximumImages.setOnSeekBarArrowsChangeListener(new SeekBarArrows.OnSeekBarArrowsChangeListener() {
             @Override
             public void onProgressChanged(float progress) {
@@ -448,11 +449,12 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 return mGestureDetector.onTouchEvent(event);
+
             }
         });
     }
 
-    private NativeMethods.MeasureDistTask.Callback measureDistTaskCallback = new NativeMethods.MeasureDistTask.Callback() {
+    public NativeMethods.MeasureDistTask.Callback measureDistTaskCallback = new NativeMethods.MeasureDistTask.Callback() {
         @Override
         public void onMeasureDistComplete(Bundle bundle) {
             if (bundle == null) {
@@ -481,7 +483,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
                 }
             } else {
                 Log.w(TAG, "Array is null");
-                if (useEigenfaces || uniqueLabels == null || uniqueLabels.length > 1)
+                if (useEigenfaces || uniqueLabels == null || uniqueLabels.length > 0)
                     showToast("Keep training...", Toast.LENGTH_SHORT);
                 else
                     showToast("Fisherfaces needs two different faces", Toast.LENGTH_SHORT);
@@ -540,8 +542,6 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
             tinydb.putListMat("images", images);
             tinydb.putListString("imagesLabels", imagesLabels);
         }
-
-
     }
 
     @Override
@@ -549,13 +549,17 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
         super.onResume();
 
         // Request permission if needed
-        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED/* || ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED*/)
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA/*, Manifest.permission.WRITE_EXTERNAL_STORAGE*/}, PERMISSIONS_REQUEST_CODE);
+        if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
+             /*|| ContextCompat.checkSelfPermission(getApplicationContext(),
+             Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED*/)
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA
+                    /* , Manifest.permission.WRITE_EXTERNAL_STORAGE*/}, PERMISSIONS_REQUEST_CODE);
         else
             loadOpenCV();
     }
 
-    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+    public BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
             switch (status) {
@@ -566,7 +570,9 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
 
                     // Read images and labels from shared preferences
                     images = tinydb.getListMat("images");
+                    Log.d("iamges",""+images);
                     imagesLabels = tinydb.getListString("imagesLabels");
+                    Log.d("imagesLabels",""+imagesLabels);
 
                     Log.i(TAG, "Number of images: " + images.size() + ". Number of labels: " + imagesLabels.size());
                     if (!images.isEmpty()) {
@@ -583,7 +589,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
         }
     };
 
-    private void loadOpenCV() {
+    public void loadOpenCV() {
         if (!OpenCVLoader.initDebug(true)) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
             OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0, this, mLoaderCallback);
@@ -708,7 +714,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity implements Cam
         return true;
     }
 
-    private void flipCameraAnimation() {
+    public void flipCameraAnimation() {
         // Flip the camera
         mOpenCvCameraView.flipCamera();
 

@@ -60,25 +60,25 @@ import java.util.Locale;
 import java.util.Set;
 
 public class CheckInActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
-    private static final String TAG = FaceRecognitionAppActivity.class.getSimpleName();
-    private static final int PERMISSIONS_REQUEST_CODE = 0;
-    private ArrayList<Mat> images;
-    private ArrayList<String> imagesLabels;
-    private String[] uniqueLabels;
-    private CameraBridgeViewBase mOpenCvCameraView;
+    public static final String TAG = CheckInActivity.class.getSimpleName();
+    public static final int PERMISSIONS_REQUEST_CODE = 0;
+    public ArrayList<Mat> images;
+    public ArrayList<String> imagesLabels;
+    public String[] uniqueLabels;
+    public CameraBridgeViewBase mOpenCvCameraView;
     public Mat mRgba, mGray;
-    private Toast mToast;
-    private boolean useEigenfaces;
-    private SeekBarArrows mThresholdFace, mThresholdDistance, mMaximumImages;
-    private float faceThreshold, distanceThreshold;
-    private int maximumImages;
-    private SharedPreferences prefs;
-    private TinyDB tinydb;
-    private Toolbar mToolbar;
-    private NativeMethods.TrainFacesTask mTrainFacesTask;
+    public Toast mToast;
+    public boolean useEigenfaces;
+    public SeekBarArrows mThresholdFace, mThresholdDistance, mMaximumImages;
+    public float faceThreshold, distanceThreshold;
+    public int maximumImages;
+    public SharedPreferences prefs;
+    public TinyDB tinydb;
+    public Toolbar mToolbar;
+    public NativeMethods.TrainFacesTask mTrainFacesTask;
 
 
-    private void showToast(String message, int duration) {
+    public void showToast(String message, int duration) {
         if (duration != Toast.LENGTH_SHORT && duration != Toast.LENGTH_LONG)
             throw new IllegalArgumentException();
         if (mToast != null && mToast.getView().isShown())
@@ -87,20 +87,13 @@ public class CheckInActivity extends AppCompatActivity implements CameraBridgeVi
         mToast.show();
     }
 
-    private void addLabel(String string) {
-        String label = string.substring(0, 1).toUpperCase(Locale.US) + string.substring(1).trim().toLowerCase(Locale.US); // Make sure that the name is always uppercase and rest is lowercase
-        imagesLabels.add(label); // Add label to list of labels
-        Log.i(TAG, "Label: " + label);
-
-        trainFaces(); // When we have finished setting the label, then retrain faces
-    }
 
     /**
      * Train faces using stored images.
      *
      * @return Returns false if the task is already running.
      */
-    private boolean trainFaces() {
+    public boolean trainFaces() {
         if (images.isEmpty())
             return true; // The array might be empty if the method is changed in the OnClickListener
 
@@ -166,100 +159,6 @@ public class CheckInActivity extends AppCompatActivity implements CameraBridgeVi
         }
     };
 
-    private void showLabelsDialog() {
-        Set<String> uniqueLabelsSet = new HashSet<>(imagesLabels); // Get all unique labels
-        if (!uniqueLabelsSet.isEmpty()) { // Make sure that there are any labels
-            AlertDialog.Builder builder = new AlertDialog.Builder(CheckInActivity.this);
-            builder.setTitle("Select label:");
-            builder.setPositiveButton("New face", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    showEnterLabelDialog();
-                }
-            });
-            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    images.remove(images.size() - 1); // Remove last image
-                }
-            });
-            builder.setCancelable(false); // Prevent the user from closing the dialog
-
-            String[] uniqueLabels = uniqueLabelsSet.toArray(new String[uniqueLabelsSet.size()]); // Convert to String array for ArrayAdapter
-            Arrays.sort(uniqueLabels); // Sort labels alphabetically
-            final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(CheckInActivity.this, android.R.layout.simple_list_item_1, uniqueLabels) {
-                @Override
-                public @NonNull
-                View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                    TextView textView = (TextView) super.getView(position, convertView, parent);
-                    if (getResources().getBoolean(R.bool.isTablet))
-                        textView.setTextSize(20); // Make text slightly bigger on tablets compared to phones
-                    else
-                        textView.setTextSize(18); // Increase text size a little bit
-                    return textView;
-                }
-            };
-            ListView mListView = new ListView(CheckInActivity.this);
-            mListView.setAdapter(arrayAdapter); // Set adapter, so the items actually show up
-            builder.setView(mListView); // Set the ListView
-
-            final AlertDialog dialog = builder.show(); // Show dialog and store in final variable, so it can be dismissed by the ListView
-
-            mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    dialog.dismiss();
-                    addLabel(arrayAdapter.getItem(position));
-                }
-            });
-        } else
-            showEnterLabelDialog(); // If there is no existing labels, then ask the user for a new label
-    }
-
-    private void showEnterLabelDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(CheckInActivity.this);
-        builder.setTitle("Please enter your name:");
-
-        final EditText input = new EditText(CheckInActivity.this);
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(input);
-
-        builder.setPositiveButton("Submit", null); // Set up positive button, but do not provide a listener, so we can check the string before dismissing the dialog
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                images.remove(images.size() - 1); // Remove last image
-            }
-        });
-        builder.setCancelable(false); // User has to input a name
-        AlertDialog dialog = builder.create();
-        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(final DialogInterface dialog) {
-                Button mButton = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
-                mButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        String string = input.getText().toString().trim();
-                        if (!string.isEmpty()) { // Make sure the input is valid
-                            // If input is valid, dismiss the dialog and add the label to the array
-                            dialog.dismiss();
-                            addLabel(string);
-                        }
-                    }
-                });
-            }
-        });
-
-        // Show keyboard, so the user can start typing straight away
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-
-        dialog.show();
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -277,6 +176,93 @@ public class CheckInActivity extends AppCompatActivity implements CameraBridgeVi
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         useEigenfaces = prefs.getBoolean("useEigenfaces", true);
 
+        mThresholdFace = findViewById(R.id.threshold_face);
+        mThresholdFace.setOnSeekBarArrowsChangeListener(new SeekBarArrows.OnSeekBarArrowsChangeListener() {
+            @Override
+            public void onProgressChanged(float progress) {
+                Log.i(TAG, "Face threshold: " + mThresholdFace.progressToString(progress));
+                faceThreshold = progress;
+            }
+        });
+        faceThreshold = mThresholdFace.getProgress(); // Get initial value
+
+        mThresholdDistance = findViewById(R.id.threshold_distance);
+        mThresholdDistance.setOnSeekBarArrowsChangeListener(new SeekBarArrows.OnSeekBarArrowsChangeListener() {
+            @Override
+            public void onProgressChanged(float progress) {
+                Log.i(TAG, "Distance threshold: " + mThresholdDistance.progressToString(progress));
+                distanceThreshold = progress;
+            }
+        });
+        distanceThreshold = mThresholdDistance.getProgress(); // Get initial value
+
+        mMaximumImages = findViewById(R.id.maximum_images);
+        mMaximumImages.setOnSeekBarArrowsChangeListener(new SeekBarArrows.OnSeekBarArrowsChangeListener() {
+            @Override
+            public void onProgressChanged(float progress) {
+                Log.i(TAG, "Maximum number of images: " + mMaximumImages.progressToString(progress));
+                maximumImages = (int) progress;
+                if (images != null && images.size() > maximumImages) {
+                    int nrRemoveImages = images.size() - maximumImages;
+                    Log.i(TAG, "Removed " + nrRemoveImages + " images from the list");
+                    images.subList(0, nrRemoveImages).clear(); // Remove oldest images
+                    imagesLabels.subList(0, nrRemoveImages).clear(); // Remove oldest labels
+                    trainFaces(); // Retrain faces
+                }
+            }
+        });
+        maximumImages = (int) mMaximumImages.getProgress(); // Get initial value
+
+
+        findViewById(R.id.take_picture_button).setOnClickListener(new View.OnClickListener() {
+            NativeMethods.MeasureDistTask mMeasureDistTask;
+
+            @Override
+            public void onClick(View v) {
+
+
+                if (mMeasureDistTask != null && mMeasureDistTask.getStatus() != AsyncTask.Status.FINISHED) {
+                    Log.i(TAG, "mMeasureDistTask is still running");
+                    showToast("Still processing old image...", Toast.LENGTH_SHORT);
+                    return;
+                }
+                if (mTrainFacesTask != null && mTrainFacesTask.getStatus() != AsyncTask.Status.FINISHED) {
+                    Log.i(TAG, "mTrainFacesTask is still running");
+                    showToast("Still training...", Toast.LENGTH_SHORT);
+                    return;
+                }
+
+                Log.i(TAG, "Gray height: " + mGray.height() + " Width: " + mGray.width() + " total: " + mGray.total());
+                if (mGray.total() == 0)
+                    return;
+
+                // Scale image in order to decrease computation time and make the image square,
+                // so it does not crash on phones with different aspect ratios for the front
+                // and back camera
+                Size imageSize = new Size(200, 200);
+                Imgproc.resize(mGray, mGray, imageSize);
+                Log.i(TAG, "Small gray height: " + mGray.height() + " Width: " + mGray.width() + " total: " + mGray.total());
+                //SaveImage(mGray);
+
+                Mat image = mGray.reshape(0, (int) mGray.total()); // Create column vector
+                Log.i(TAG, "Vector height: " + image.height() + " Width: " + image.width() + " total: " + image.total());
+                images.add(image); // Add current image to the array
+
+                if (images.size() > maximumImages) {
+                    images.remove(0); // Remove first image
+                    imagesLabels.remove(0); // Remove first label
+                    Log.i(TAG, "The number of images is limited to: " + images.size());
+                }
+
+                // Calculate normalized Euclidean distance
+                mMeasureDistTask = new NativeMethods.MeasureDistTask(useEigenfaces, measureDistTaskCallback);
+                mMeasureDistTask.execute(image);
+
+                //showLabelsDialog();
+                //getCurrentTimeDate();
+            }
+        });
+
 
         final GestureDetector mGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
@@ -293,7 +279,7 @@ public class CheckInActivity extends AppCompatActivity implements CameraBridgeVi
 
         });
 
-        mOpenCvCameraView = findViewById(R.id.camera_java_surface_view_detector);
+        mOpenCvCameraView = findViewById(R.id.camera_java_surface_view);
         mOpenCvCameraView.setCameraIndex(prefs.getInt("mCameraIndex", CameraBridgeViewBase.CAMERA_ID_FRONT));
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
@@ -305,17 +291,10 @@ public class CheckInActivity extends AppCompatActivity implements CameraBridgeVi
         });
 
     }
-   /* @Override
-    public boolean dispatchTouchEvent(MotionEvent e) {
-        boolean dispatched;
-        Log.d(TAG, "dispatchTouchEvent");
-        dispatched = super.dispatchTouchEvent(e);
-        if (!dispatched && mOpenCvCameraView != null) dispatched = mOpenCvCameraView.onTouchEvent(e);
-        return dispatched;
-    }*/
 
 
-    private NativeMethods.MeasureDistTask.Callback measureDistTaskCallback = new NativeMethods.MeasureDistTask.Callback() {
+
+    public NativeMethods.MeasureDistTask.Callback measureDistTaskCallback = new NativeMethods.MeasureDistTask.Callback() {
         @Override
         public void onMeasureDistComplete(Bundle bundle) {
             if (bundle == null) {
@@ -383,10 +362,6 @@ public class CheckInActivity extends AppCompatActivity implements CameraBridgeVi
     public void onStop() {
         super.onStop();
 
-
-        // Store ArrayLists containing the images and labels
-
-
     }
 
     @Override
@@ -413,7 +388,7 @@ public class CheckInActivity extends AppCompatActivity implements CameraBridgeVi
                     images = tinydb.getListMat("images");
                     imagesLabels = tinydb.getListString("imagesLabels");
 
-                    //Log.i(TAG, "Number of images: " + images.size() + ". Number of labels: " + imagesLabels.size());
+                    Log.i(TAG, "Number of images: " + images.size() + ". Number of labels: " + imagesLabels.size());
                     if (!images.isEmpty()) {
                         trainFaces(); // Train images after they are loaded
                         Log.i(TAG, "Images height: " + images.get(0).height() + " Width: " + images.get(0).width() + " total: " + images.get(0).total());
@@ -510,34 +485,9 @@ public class CheckInActivity extends AppCompatActivity implements CameraBridgeVi
         return mRgba;
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    public void SaveImage(Mat mat) {
-        Mat mIntermediateMat = new Mat();
-
-        if (mat.channels() == 1) // Grayscale image
-            Imgproc.cvtColor(mat, mIntermediateMat, Imgproc.COLOR_GRAY2BGR);
-        else
-            Imgproc.cvtColor(mat, mIntermediateMat, Imgproc.COLOR_RGBA2BGR);
-
-        File path = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), TAG); // Save pictures in Pictures directory
-        path.mkdir(); // Create directory if needed
-        String fileName = "IMG_" + new SimpleDateFormat("yyyyMMdd_HHmmss_SSS", Locale.US).format(new Date()) + ".png";
-        File file = new File(path, fileName);
-
-        boolean bool = Imgcodecs.imwrite(file.toString(), mIntermediateMat);
-
-        if (bool)
-            Log.i(TAG, "SUCCESS writing image to external storage");
-        else
-            Log.e(TAG, "Failed writing image to external storage");
-    }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START))
-            drawer.closeDrawer(GravityCompat.START);
-        else
             super.onBackPressed();
     }
 
@@ -593,5 +543,8 @@ public class CheckInActivity extends AppCompatActivity implements CameraBridgeVi
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void getCurrentTimeDate() {
     }
 }

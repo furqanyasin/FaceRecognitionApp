@@ -5,5 +5,3 @@ project(':opencv').projectDir = new File(System.getenv('OPENCV_ANDROID_SDK') + '
 /*include ':app'
 include ':opencv'
 project(':opencv').projectDir = new File(System.getenv('OPENCV_ANDROID_SDK') + '/sdk')*/
-include ':openCVLibrary341'
-include ':openCVLibrary341'

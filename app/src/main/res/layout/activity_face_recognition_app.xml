@@ -46,7 +46,6 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:checked="true"
                         android:text="@string/fisherfaces" />
 
                     <RadioButton
@@ -54,6 +53,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:checked="true"
                         android:text="@string/eigenfaces" />
 
                 </RadioGroup>
@@ -62,16 +62,16 @@
                     android:id="@+id/threshold_face"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    SeekBarArrows:max=".9"
-                    SeekBarArrows:n_values="900"
+                    SeekBarArrows:max=".5"
+                    SeekBarArrows:n_values="500"
                     SeekBarArrows:text="@string/threshold_face" />
 
                 <com.furqan.facerecognitionattendaceapp.SeekBarArrows
                     android:id="@+id/threshold_distance"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    SeekBarArrows:max=".9"
-                    SeekBarArrows:n_values="900"
+                    SeekBarArrows:max=".5"
+                    SeekBarArrows:n_values="500"
                     SeekBarArrows:text="@string/threshold_distance" />
 
                 <com.furqan.facerecognitionattendaceapp.SeekBarArrows
@@ -79,16 +79,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     SeekBarArrows:max="100"
-                    SeekBarArrows:min="5"
+                    SeekBarArrows:min="1"
                     SeekBarArrows:n_values="100"
                     SeekBarArrows:text="@string/maximum_images" />
 
-                <Button
-                    android:id="@+id/add_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/arrow_text_margin"
-                    android:text="@string/add_employee" />
                 <Button
                     android:id="@+id/clear_button"
                     android:layout_width="match_parent"

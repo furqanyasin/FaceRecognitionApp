@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.furqan.facerecognitionattendaceapp">
-    <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/> -->
+    package="com.furqan.facerecognitionattendaceapp"><!--
+     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>-->
     <uses-permission android:name="android.permission.CAMERA" />
 
     <uses-feature
@@ -24,7 +24,11 @@
         android:label="@string/app_name"
         android:supportsRtl="false"
         android:theme="@style/AppTheme.NoActionBar">
-        <activity android:name=".CheckInActivity"></activity>
+        <activity
+            android:name=".CheckInActivity"
+            android:label="@string/checkin_attendance"
+            android:screenOrientation="fullSensor"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,9 +38,9 @@
         </activity>
         <activity
             android:name=".FaceRecognitionAppActivity"
-            android:label="@string/app_name"
+            android:label="@string/add_new_employee"
             android:screenOrientation="fullSensor"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>
